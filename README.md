@@ -6,7 +6,7 @@ This tool is a python tool based on python's [GroupyAPI](https://pypi.org/projec
 
 ## How to
 
-This tool function by executing the `main.py` file every 1-2 minutes. This tool will check the last `k` messages in `active_servers`'s groupchat for words from the defined `sus` list, and if the number of these words are greater or equal to `words` then it will remove the user and notify `admin`. 
+This tool functions by executing the `main.py` file every 1-2 minutes. This tool will check the last `k` messages in `active_servers`'s groupchat for words from the defined `sus` list, and if the number of these words are greater or equal to `words` then it will remove the user and notify `admin`. 
 
  It is recommended that this is done on a linux based machine, but it will work on any. The only thing that needs to change is how you are automatically calling the `main.py` file.
 
