@@ -3,10 +3,11 @@ from secrets import client, admin_init
 
 client = cli.from_token(client)
 
-#server name to look at
-active_servers = ["test_group"]
+#if you are trying to see user_ids for configuring admin user_id or you want to add to safe_senders set this as true to print out all user_ids
+user_id_mode = False
 
-#active_servers = ["UGA Aviation Club✈️"]
+#server name to look at
+active_servers = ["UGA Aviation Club✈️"]
 
 #number of messages per run to check
 k=20
@@ -17,9 +18,13 @@ words=2
 #sus word list (to be expanded)
 sus = ['taylor swift','selling','ticket','tickets',"-", 'sale']
 
+#user_id to be contacted in the event of a kicking
 admin = [admin_init]
 
 
+"""
+Function which handles kicking users / identifying if user is a safe-sender
+"""
 def handle(msg, members, safe_senders, count_list, group):
     
     #identify sus user
@@ -64,7 +69,9 @@ def handle(msg, members, safe_senders, count_list, group):
 
 
 
-
+"""
+main function to be called which checks the last k messages in chat for sus words
+"""
 def checker():
     for group in client.groups.list():
         if group.name in active_servers:
@@ -110,19 +117,18 @@ def checker():
                     handle(msg,members,safe_senders,count_list,group)
 
                 
+if not user_id_mode:
+    checker()
 
-checker()
 
-
-
-"""
-quick utility for finding client_id's for selecting admin and safe senders
-"""
-# for group in client.groups.list():
-#     if group.name in active_servers:
-#         print(group.name)
-#         members = {f'{x.user_id}':x for x in group.members}
-#         for xp in members:
-#             print(xp, members[xp])
+else:
+    """
+    quick utility for finding client_id's for selecting admin and safe senders
+    """
+    for group in client.groups.list():
+        if group.name in active_servers:
+            print(group.name)
+            members = {f'{x.user_id}':x for x in group.members}
+            for xp in members: print(xp, members[xp])
 
 
