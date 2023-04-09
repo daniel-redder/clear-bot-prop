@@ -10,7 +10,7 @@ user_id_mode = False
 active_servers = ["UGA Aviation Club✈️"]
 
 #number of messages per run to check
-k=20
+k=5
 
 #number of words required for banning
 words=2
