@@ -45,7 +45,7 @@ def handle(msg, members, safe_senders, count_list, group):
     try:
         bad_user.remove()
     except:
-        admin_chat.post(text="unable to remove, already kicked?")
+        #admin_chat.post(text="unable to remove, already kicked?")
         print("unable to kick, not sending notification message because it is likely a duplicate message, but be aware could be something sus")
         return None
 
