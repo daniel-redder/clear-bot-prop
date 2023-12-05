@@ -2,6 +2,10 @@
 author: Daniel Redder
 
 ----
+
+## To prevent the spread of "I'm selling x tickets to (parking permits / taylor swift concerts / football games) spam bots" I've made a bot to remove these spammers. 
+
+
 This tool is a python tool based on python's [GroupyAPI](https://pypi.org/project/GroupyAPI/) which will kick users from a group if they say too many in a small set of words. This could be redone to use some fancy NLP stuff, but it probably isn't neccesary for this task.
 
 ## How to
