@@ -1,4 +1,4 @@
-# Anti-Taylor Swift bot (UGA AV Club)
+# Anti-Taylor Swift bot (UGA Aviation Club)
 author: Daniel Redder
 
 ----
