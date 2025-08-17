@@ -1,132 +1,129 @@
 from groupy.client import Client as cli
-from secrets import client, admin_init
+from typing import List, Any
+import yaml
+import random
 
-client = cli.from_token(client)
-
-#if you are trying to see user_ids for configuring admin user_id or you want to add to safe_senders set this as true to print out all user_ids
-user_id_mode = False
-
-#server name to look at
-active_servers = ["UGA Aviation Club✈️"]
-
-#number of messages per run to check
-k=5
-
-#number of words required for banning
-words=2
-
-#sus word list (to be expanded)
-sus = ['taylor swift','selling','ticket','tickets',"-", 'sale']
-
-#user_id to be contacted in the event of a kicking
-admin = [admin_init]
+with open("config.yaml", "r") as f:
+    secrets = yaml.safe_load(f)
 
 
-"""
-Function which handles kicking users / identifying if user is a safe-sender
-"""
-def handle(msg, members, safe_senders, count_list, group):
+client = cli.from_token(secrets['client'])
+admins = secrets['admin_ids']
+ignored = secrets['ignored_ids']
+
+
+def handle(members: List[Any], safe_senders:List[str], group:Any, admin_chats, count:int=None, msg:str=None):
+    """
+    Function which handles kicking users / identifying if user is a safe-sender
     
+    Args:
+        members (List of groupy member type... whatever): ...
+        safe_senders (List[str]): list of safe user ids
+        group (groupy server type): ...
+        count (int): number of impermissible words said
+        msg (str): string message which resulted in banning (or none)
+    """
+
     #identify sus user
     try:
         bad_user = members[msg.data['sender_id']]
     except:
         print("caught missing user")
         return None
-
-
+    
     #is it a user we don't care about
     if msg.data['sender_id'] in safe_senders:
         print(msg.data['name'], " is a safe sender")
-        return None 
-
+        return None
 
     #get em outta here
     try:
         bad_user.remove()
+        counter = counter + 1
+        return msg.data['name']
     except:
-        #admin_chat.post(text="unable to remove, already kicked?")
         print("unable to kick, not sending notification message because it is likely a duplicate message, but be aware could be something sus")
         return None
-
-    #notification message works
-    group.post(text=f"{msg.data['name']} posted something SUS! \nWe thus kick them for saying sus words")
-
-    #select admin dm
-    admin_chat = None
-    for chat in client.chats.list_all(): 
-        admin_chat = chat if chat.data['other_user']['id'] in admin else admin_chat 
-    
-    #dm admin with post
-    admin_chat.post(text = f"{msg.data['name']} was kicked \nFor saying the sus words {count_list} \n they said: \n {msg.data['text']}")
     
 
-    #log the user
-    print(bad_user)
 
-
-
-
-
-
-"""
-main function to be called which checks the last k messages in chat for sus words
-"""
 def checker():
+    """
+    main function to be called which checks the last k messages in chat for sus words
+    """
     for group in client.groups.list():
-        if group.name in active_servers:
-            print(group.name)
-
-            #collect the last k messages
-            mesg_iter = group.messages.list_all()
+        if group.name in secrets['servers']:
+            #collect list of all current members
+            members = {f'{x.user_id}':x for x in group.members}
             
             #identify self
             safe_senders = [client.user.me['user_id']]
-            safe_senders= safe_senders + admin
+            safe_senders= safe_senders + admins + ignored
 
+            #collect the last k messages
+            mesg_iter = group.messages.list_all()
 
             #collect messages
             try:
-                messages = [next(mesg_iter) for x in range(k)]
+                messages = [next(mesg_iter) for x in range(secrets['blocking']['words_to_check'])]
             except:
                 mesg_iter = group.messages.list_all()
                 print('defaulting to all')
                 messages=[]
                 for x in mesg_iter:
                     messages.append(x)
-
-            #collect list of all current members
-            members = {f'{x.user_id}':x for x in group.members}
-
             
+            kicked_users = []
 
-            #print(messages[0].data['text'])
-            print(len(messages))
+            #block for messages
             for msg in messages:
-                #collect text data
                 msg_text = msg.data['text']
-
                 #count number of sus word occurences
-                count_list = [x for x in sus if x in msg_text.lower()]
+                count_list = [x for x in secrets['blocking']['sus'] if x in msg_text.lower()]
                 count = len(count_list)
 
-                #print(count, msg.data['name'])
-
                 #if sus then msg and ban!
-                if count >= words:          
-                    handle(msg,members,safe_senders,count_list,group)
+                if count >= secrets['blocking']['impermissible_words']:          
+                    kicked_users.append(handle(
+                        members=members,
+                        group=group,
+                        safe_senders=safe_senders,
+                        admin_chats=None, #TODO implement admin dms...
+                        count=count,
+                        msg=msg
+                    ))
+            
+            all_members = {k:m for k,m in members.items() if m.name not in kicked_users and k not in safe_senders}
+
+            if secrets['blocking']['capital_names']:
+                bad_names = {k:m for k,m in all_members.items() if m.name.isupper()}
+                for user, userobj in bad_names:
+                    userobj.remove()
+                    all_members.pop(user)
+                bad_names = [m.name for m in list(bad_names.values())]
+            else:
+                bad_names = []
+
+            kick_message = random.choice(secrets['kicking_messages'])
+            kicked_users = kicked_users + bad_names
+
+            if len(kicked_users) > 0:
+                group.post(
+                    text=kick_message + " kicked: " + ', '.join(kicked_users)
+                )
+
+
+
 
                 
-if not user_id_mode:
+if not secrets['user_id_mode']:
     checker()
-
-
 else:
     """
     quick utility for finding client_id's for selecting admin and safe senders
     """
     for group in client.groups.list():
-        if group.name in active_servers:
+        if group.name in secrets['servers']:
             print(group.name)
             members = {f'{x.user_id}':x for x in group.members}
             for xp in members: print(xp, members[xp])

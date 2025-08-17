@@ -1,0 +1,32 @@
+#if you are trying to see user_ids for configuring admin user_id or you want to add to safe_senders set this as true to print out all user_ids
+user_id_mode: false
+
+#groupy api params
+client: '<YOUR_CLIENT_TOKEN>'
+admin_ids:
+  - '<ADMIN_USER_ID>'
+ignored_ids: 
+  - '<IGNORED_USER_ID>'
+
+#blocking settings
+blocking:
+  capital_names: true
+  sus: 
+    - taylor swift
+    - selling
+    - ticket
+    - tickets
+    - '-'
+    - sale
+    - parking
+    - permit
+    - permits
+  impermissible_words: 2
+  words_to_check: 5
+
+#servers to check
+servers:
+  - '<SERVER_NAME>'
+
+kick_messages:
+  - "<messages to choose randomly for kicks>"
