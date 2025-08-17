@@ -39,7 +39,6 @@ def handle(members: List[Any], safe_senders:List[str], group:Any, admin_chats, c
     #get em outta here
     try:
         bad_user.remove()
-        counter = counter + 1
         return msg.data['name']
     except:
         print("unable to kick, not sending notification message because it is likely a duplicate message, but be aware could be something sus")
@@ -104,8 +103,9 @@ def checker():
             else:
                 bad_names = []
 
-            kick_message = random.choice(secrets['kicking_messages'])
+            kick_message = random.choice(secrets['kick_messages'])
             kicked_users = kicked_users + bad_names
+            kicked_users = [k for k in kicked_users if k is not None]
 
             if len(kicked_users) > 0:
                 group.post(
